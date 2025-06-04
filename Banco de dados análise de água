@@ -1,0 +1,495 @@
+import mysql.connector
+
+conexao = mysql.connector.connect(
+    host ='localhost',
+    user ='root',
+    password ='',
+    database ='experimento'
+)
+
+cursor = conexao.cursor()
+
+def inserir_local():
+    latitude = input('digite a latitude: ') 
+    longitude = input("digite o longitude: ")
+    nome_local = input("digite o nome do local: ")
+    comando1 = f'insert into local (latitude, longitude, nome_local) VALUES ("{latitude}", "{longitude}","{nome_local}")'
+    print (comando1)
+    cursor.execute (comando1)
+    conexao.commit()
+
+
+def inserir_amostra():
+    data = input('digite a data da coleta:') 
+    nome_amostra = input("digite o nome da amostra")
+    id_local = input('digite o número do local: ')
+    comando2 = f'insert into amostra (data_amostra, nome_amostra, id_local) VALUES ("{data}", "{nome_amostra}", "{id_local}")'
+    print (comando2)
+    cursor.execute (comando2)
+    conexao.commit()
+
+def inserir_dados():
+    condutividade = input('digite a condutividade:') 
+    temperatura = input("digite a temperatura")
+    turbidez = input('digite a turbidez:') 
+    id_amostra = input("digite o numero da amostra: ")
+    id_ph = input ('digite o id do ph: ')
+    comando3 = f'insert into dados (condutividade, temperatura, turbidez, id_amostra, id_ph) VALUES ("{condutividade}", "{temperatura}", "{turbidez}", "{id_amostra}","{id_ph}")'
+    print (comando3)
+    cursor.execute (comando3)
+    conexao.commit()
+
+def inserir_ph():
+    valores = input('digite o valor do ph: ')
+    comando4 = f'insert into ph (valores) VALUES ("{valores}")'
+    print (comando4)
+    cursor.execute (comando4)
+    conexao.commit()
+    return valores
+
+def inserir_acido():
+    total = input('digite o valor do alcalinidade total: ')
+    acido = acidez()
+    id_ph = input ('digite o id do ph: ')
+    comando5 = f'insert into acido (total, acidez, id_ph) VALUES ("{total}", "{acido}", "{id_ph}")'
+    print (comando5)
+    cursor.execute (comando5)
+    conexao.commit()
+
+def inserir_alcalinidade():
+    total = alcalinidade_total()
+    parcial = alcalinidade_parcial()
+    bicarbonato = input ('digite a alcalinidade do bicarbonato: ')
+    carbonato = input ('digite a alcalinidade do carbonato: ') 
+    hidroxila = input ('digite a alcalinidade da hidroxila: ')
+    id_ph = input ('digite o id do ph: ')   
+    comando6 = f'insert into alcalinidade (total, parcial, bicarbonato, carbonato, hidroxila, id_ph) VALUES ("{total}", "{parcial}", "{bicarbonato}", "{carbonato}", "{hidroxila}", "{id_ph}")'
+    print (comando6)
+    cursor.execute (comando6)
+    conexao.commit()
+
+
+
+def acidez():
+    volume_NaOH = float(input("digite o volume de NaOH: "))
+    converter = volume_NaOH * 0.001
+    conta =  converter * C_NaOH * Fator_de_correcao / (volume)
+    x = round(conta,2)
+    print(x)
+    return x
+   
+
+C_NaOH = 0.1
+Fator_de_correcao = 50000
+volume = 0.1
+
+
+def alcalinidade_parcial():
+    volume_HCl = float(input("digite o volume de HCl: "))
+    converter2 = volume_HCl * 0.001
+    conta2 = converter2 * C_HCl * Fator_de_correcao2 / (volume2)
+    x2 = round(conta2,2)
+    print(x2)
+    return x2
+
+C_HCl = 0.1
+Fator_de_correcao2 = 50000
+volume2 = 0.1
+
+def alcalinidade_total():
+    volume_total_HCl = float(input("digite o volume total de HCl: "))
+    converter3 = volume_total_HCl * 0.001
+    conta3 = converter3 * C_HCl2 * Fator_de_correcao3 / (volume3)
+    x3 = round(conta3,2)
+    print(x3)
+    return x3
+
+C_HCl2 = 0.1
+Fator_de_correcao3 = 50000
+volume3 = 0.1
+
+
+def selecionar_dados():
+    coamndo7 = '''SELECT * FROM amostra
+    inner join local on (amostra.id_local = local.id_local)
+    inner join dados on (dados.id_amostra = amostra.id_amostra)
+    inner join ph on (ph.id_ph = dados.id_ph)
+    WHERE dados.id_dados = "1";'''
+
+def deletar_dados():
+    print("Escolha a tabela da qual deseja excluir os dados:")
+    print("1. Local")
+    print("2. Amostra")
+    print("3. Dados")
+    print("4. PH")
+    print("5. Ácido")
+    print("6. Alcalinidade")
+    
+    tabela = input("Digite o número da tabela: ")
+    id_item = input("Digite o ID do item que deseja excluir: ")
+
+    if tabela == "1":
+        comando = f'DELETE FROM local WHERE id_local = {id_item}'
+    elif tabela == "2":
+        comando = f'DELETE FROM amostra WHERE id_amostra = {id_item}'
+    elif tabela == "3":
+        comando = f'DELETE FROM dados WHERE id_dados = {id_item}'
+    elif tabela == "4":
+        comando = f'DELETE FROM ph WHERE id_ph = {id_item}'
+    elif tabela == "5":
+        comando = f'DELETE FROM acido WHERE id_acido = {id_item}'
+    elif tabela == "6":
+        comando = f'DELETE FROM alcalinidade WHERE id_alcalinidade = {id_item}'
+    else:
+        print("Tabela inválida!")
+        return
+    
+    cursor.execute(comando)
+    conexao.commit()
+    print(f"Item com ID {id_item} excluído com sucesso!")
+
+
+def atualizar_dados():
+    print("Escolha a tabela na qual deseja atualizar os dados:")
+    print("1. Local")
+    print("2. Amostra")
+    print("3. Dados")
+    print("4. PH")
+    print("5. Ácido")
+    print("6. Alcalinidade")
+    
+    tabela = input("Digite o número da tabela: ")
+    id_item = input("Digite o ID do item que deseja atualizar: ")
+
+    if tabela == "1":
+        latitude = input('Digite a nova latitude: ')
+        longitude = input("Digite o novo longitude: ")
+        nome_local = input("Digite o novo nome do local: ")
+        comando = f'UPDATE local SET latitude = "{latitude}", longitude = "{longitude}", nome_local = "{nome_local}" WHERE id_local = {id_item}'
+    elif tabela == "2":
+        data = input('Digite a nova data da coleta: ') 
+        nome_amostra = input("Digite o novo nome da amostra")
+        id_local = input('Digite o novo número do local: ')
+        comando = f'UPDATE amostra SET data_amostra = "{data}", nome_amostra = "{nome_amostra}", id_local = "{id_local}" WHERE id_amostra = {id_item}'
+    elif tabela == "3":
+        condutividade = input('Digite a nova condutividade:') 
+        temperatura = input("Digite a nova temperatura")
+        turbidez = input('Digite a nova turbidez:') 
+        id_amostra = input("Digite o novo número da amostra: ")
+        comando = f'UPDATE dados SET condutividade = "{condutividade}", temperatura = "{temperatura}", turbidez = "{turbidez}", id_amostra = "{id_amostra}" WHERE id_dados = {id_item}'
+    elif tabela == "4":
+        valores = input('Digite o novo valor do PH: ')
+        fk_ph = input('Digite o novo ID do PH: ') 
+        comando = f'UPDATE ph SET valores = "{valores}", FK_ph = "{fk_ph}" WHERE id_ph = {id_item}'
+    elif tabela == "5":
+        total = input('Digite o novo valor da alcalinidade total: ')
+        acidez = input('Digite o novo valor da acidez: ') 
+        FK_ph = input('Digite o novo ID do PH: ')
+        comando = f'UPDATE acido SET total = "{total}", acidez = "{acidez}", FK_ph = "{FK_ph}" WHERE id_acido = {id_item}'
+    elif tabela == "6":
+        total = input('Digite o novo valor da alcalinidade total: ')
+        parcial = input('Digite o novo valor da alcalinidade parcial: ') 
+        bicarbonato = input('Digite a nova alcalinidade do bicarbonato: ')
+        carbonato = input('Digite a nova alcalinidade do carbonato: ') 
+        hidroxila = input('Digite a nova alcalinidade da hidroxila: ')   
+        FK_ph = input('Digite o novo ID do PH: ')   
+        comando = f'UPDATE alcalinidade SET total = "{total}", parcial = "{parcial}", bicarbonato = "{bicarbonato}", carbonato = "{carbonato}", hidroxila = "{hidroxila}", FK_ph = "{FK_ph}" WHERE id_alcalinidade = {id_item}'
+    else:
+        print("Tabela inválida!")
+        return
+    
+    cursor.execute(comando)
+    conexao.commit()
+    print(f"Item com ID {id_item} atualizado com sucesso!")
+
+
+
+
+
+
+print("Digite o que deseja:")
+print("\n1. cadastrar dados")
+print("2. selecionar dados")
+print("3. atualizar dados")
+print("4. deletar dados")
+
+
+
+opcao = input("Escolha uma opção")
+if opcao == "1":
+
+    inserir_local()
+    inserir_amostra()
+    inserir_dados()
+    inserir_ph()
+
+    c = input('Digite se é ácido (S/N): ')
+    if c == 's':
+        inserir_acido()
+    else:
+        inserir_alcalinidade()
+
+elif opcao == "2":
+    selecionar_dados()
+
+elif opcao == "3":
+    atualizar_dados()
+
+else:
+    deletar_dados()
+
+conexao.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+import mysql.connector
+
+conexao = mysql.connector.connect(
+    host ='localhost',
+    user ='root',
+    password ='',
+    database ='experimento'
+)
+
+cursor = conexao.cursor()
+
+def inserir_local():
+    latitude = input('digite a latitude: ') 
+    longitude = input("digite o longitude: ")
+    nome_local = input("digite o nome do local: ")
+    comando1 = f'insert into local (latitude, longitude, nome_local) VALUES ("{latitude}", "{longitude}","{nome_local}")'
+    print (comando1)
+    cursor.execute (comando1)
+    conexao.commit()
+
+
+def inserir_amostra():
+    data = input('digite a data da coleta:') 
+    nome_amostra = input("digite o nome da amostra")
+    id_local = input('digite o número do local: ')
+    comando2 = f'insert into amostra (data_amostra, nome_amostra, id_local) VALUES ("{data}", "{nome_amostra}", "{id_local}")'
+    print (comando2)
+    cursor.execute (comando2)
+    conexao.commit()
+
+def inserir_dados():
+    condutividade = input('digite a condutividade:') 
+    temperatura = input("digite a temperatura")
+    turbidez = input('digite a turbidez:') 
+    id_amostra = input("digite o numero da amostra: ")
+    id_ph = input ('digite o id do ph: ')
+    comando3 = f'insert into dados (condutividade, temperatura, turbidez, id_amostra, id_ph) VALUES ("{condutividade}", "{temperatura}", "{turbidez}", "{id_amostra}","{id_ph}")'
+    print (comando3)
+    cursor.execute (comando3)
+    conexao.commit()
+
+def inserir_ph():
+    valores = input('digite o valor do ph: ')
+    comando4 = f'insert into ph (valores) VALUES ("{valores}")'
+    print (comando4)
+    cursor.execute (comando4)
+    conexao.commit()
+    return valores
+
+def inserir_acido():
+    total = input('digite o valor do alcalinidade total: ')
+    acido = acidez()
+    id_ph = input ('digite o id do ph: ')
+    comando5 = f'insert into acido (total, acidez, id_ph) VALUES ("{total}", "{acido}", "{id_ph}")'
+    print (comando5)
+    cursor.execute (comando5)
+    conexao.commit()
+
+def inserir_alcalinidade():
+    total = alcalinidade_total()
+    parcial = alcalinidade_parcial()
+    bicarbonato = input ('digite a alcalinidade do bicarbonato: ')
+    carbonato = input ('digite a alcalinidade do carbonato: ') 
+    hidroxila = input ('digite a alcalinidade da hidroxila: ')
+    id_ph = input ('digite o id do ph: ')   
+    comando6 = f'insert into alcalinidade (total, parcial, bicarbonato, carbonato, hidroxila, id_ph) VALUES ("{total}", "{parcial}", "{bicarbonato}", "{carbonato}", "{hidroxila}", "{id_ph}")'
+    print (comando6)
+    cursor.execute (comando6)
+    conexao.commit()
+
+
+
+def acidez():
+    volume_NaOH = float(input("digite o volume de NaOH: "))
+    converter = volume_NaOH * 0.001
+    conta =  converter * C_NaOH * Fator_de_correcao / (volume)
+    x = round(conta,2)
+    print(x)
+    return x
+   
+
+C_NaOH = 0.1
+Fator_de_correcao = 50000
+volume = 0.1
+
+
+def alcalinidade_parcial():
+    volume_HCl = float(input("digite o volume de HCl: "))
+    converter2 = volume_HCl * 0.001
+    conta2 = converter2 * C_HCl * Fator_de_correcao2 / (volume2)
+    x2 = round(conta2,2)
+    print(x2)
+    return x2
+
+C_HCl = 0.1
+Fator_de_correcao2 = 50000
+volume2 = 0.1
+
+def alcalinidade_total():
+    volume_total_HCl = float(input("digite o volume total de HCl: "))
+    converter3 = volume_total_HCl * 0.001
+    conta3 = converter3 * C_HCl2 * Fator_de_correcao3 / (volume3)
+    x3 = round(conta3,2)
+    print(x3)
+    return x3
+
+C_HCl2 = 0.1
+Fator_de_correcao3 = 50000
+volume3 = 0.1
+
+
+def selecionar_dados():
+    coamndo7 = '''SELECT * FROM amostra
+    inner join local on (amostra.id_local = local.id_local)
+    inner join dados on (dados.id_amostra = amostra.id_amostra)
+    inner join ph on (ph.id_ph = dados.id_ph)
+    WHERE dados.id_dados = "1";'''
+
+def deletar_dados():
+    print("Escolha a tabela da qual deseja excluir os dados:")
+    print("1. Local")
+    print("2. Amostra")
+    print("3. Dados")
+    print("4. PH")
+    print("5. Ácido")
+    print("6. Alcalinidade")
+    
+    tabela = input("Digite o número da tabela: ")
+    id_item = input("Digite o ID do item que deseja excluir: ")
+
+    if tabela == "1":
+        comando = f'DELETE FROM local WHERE id_local = {id_item}'
+    elif tabela == "2":
+        comando = f'DELETE FROM amostra WHERE id_amostra = {id_item}'
+    elif tabela == "3":
+        comando = f'DELETE FROM dados WHERE id_dados = {id_item}'
+    elif tabela == "4":
+        comando = f'DELETE FROM ph WHERE id_ph = {id_item}'
+    elif tabela == "5":
+        comando = f'DELETE FROM acido WHERE id_acido = {id_item}'
+    elif tabela == "6":
+        comando = f'DELETE FROM alcalinidade WHERE id_alcalinidade = {id_item}'
+    else:
+        print("Tabela inválida!")
+        return
+    
+    cursor.execute(comando)
+    conexao.commit()
+    print(f"Item com ID {id_item} excluído com sucesso!")
+
+
+def atualizar_dados():
+    print("Escolha a tabela na qual deseja atualizar os dados:")
+    print("1. Local")
+    print("2. Amostra")
+    print("3. Dados")
+    print("4. PH")
+    print("5. Ácido")
+    print("6. Alcalinidade")
+    
+    tabela = input("Digite o número da tabela: ")
+    id_item = input("Digite o ID do item que deseja atualizar: ")
+
+    if tabela == "1":
+        latitude = input('Digite a nova latitude: ')
+        longitude = input("Digite o novo longitude: ")
+        nome_local = input("Digite o novo nome do local: ")
+        comando = f'UPDATE local SET latitude = "{latitude}", longitude = "{longitude}", nome_local = "{nome_local}" WHERE id_local = {id_item}'
+    elif tabela == "2":
+        data = input('Digite a nova data da coleta: ') 
+        nome_amostra = input("Digite o novo nome da amostra")
+        id_local = input('Digite o novo número do local: ')
+        comando = f'UPDATE amostra SET data_amostra = "{data}", nome_amostra = "{nome_amostra}", id_local = "{id_local}" WHERE id_amostra = {id_item}'
+    elif tabela == "3":
+        condutividade = input('Digite a nova condutividade:') 
+        temperatura = input("Digite a nova temperatura")
+        turbidez = input('Digite a nova turbidez:') 
+        id_amostra = input("Digite o novo número da amostra: ")
+        comando = f'UPDATE dados SET condutividade = "{condutividade}", temperatura = "{temperatura}", turbidez = "{turbidez}", id_amostra = "{id_amostra}" WHERE id_dados = {id_item}'
+    elif tabela == "4":
+        valores = input('Digite o novo valor do PH: ')
+        fk_ph = input('Digite o novo ID do PH: ') 
+        comando = f'UPDATE ph SET valores = "{valores}", FK_ph = "{fk_ph}" WHERE id_ph = {id_item}'
+    elif tabela == "5":
+        total = input('Digite o novo valor da alcalinidade total: ')
+        acidez = input('Digite o novo valor da acidez: ') 
+        FK_ph = input('Digite o novo ID do PH: ')
+        comando = f'UPDATE acido SET total = "{total}", acidez = "{acidez}", FK_ph = "{FK_ph}" WHERE id_acido = {id_item}'
+    elif tabela == "6":
+        total = input('Digite o novo valor da alcalinidade total: ')
+        parcial = input('Digite o novo valor da alcalinidade parcial: ') 
+        bicarbonato = input('Digite a nova alcalinidade do bicarbonato: ')
+        carbonato = input('Digite a nova alcalinidade do carbonato: ') 
+        hidroxila = input('Digite a nova alcalinidade da hidroxila: ')   
+        FK_ph = input('Digite o novo ID do PH: ')   
+        comando = f'UPDATE alcalinidade SET total = "{total}", parcial = "{parcial}", bicarbonato = "{bicarbonato}", carbonato = "{carbonato}", hidroxila = "{hidroxila}", FK_ph = "{FK_ph}" WHERE id_alcalinidade = {id_item}'
+    else:
+        print("Tabela inválida!")
+        return
+    
+    cursor.execute(comando)
+    conexao.commit()
+    print(f"Item com ID {id_item} atualizado com sucesso!")
+
+
+
+
+
+
+print("Digite o que deseja:")
+print("\n1. cadastrar dados")
+print("2. selecionar dados")
+print("3. atualizar dados")
+print("4. deletar dados")
+
+
+
+opcao = input("Escolha uma opção")
+if opcao == "1":
+
+    inserir_local()
+    inserir_amostra()
+    inserir_dados()
+    inserir_ph()
+
+    c = input('Digite se é ácido (S/N): ')
+    if c == 's':
+        inserir_acido()
+    else:
+        inserir_alcalinidade()
+
+elif opcao == "2":
+    selecionar_dados()
+
+elif opcao == "3":
+    atualizar_dados()
+
+else:
+    deletar_dados()
+
+conexao.close()
