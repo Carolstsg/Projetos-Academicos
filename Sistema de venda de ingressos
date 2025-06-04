@@ -1,0 +1,185 @@
+# Lista para armazenar filmes
+filmes = []
+
+# Lista para armazenar sessões
+sessoes = []
+
+#Função para cadastrar filme
+def cadastrar_filme():
+    nome = input('\nDigite o nome do filme: ')
+    descricao = input('Digite a descrição do filme: ')
+    duracao = input('Digite a duração do filme (em minutos): ')
+    sinopse = input('Digite a sinopse do filme: ')
+    filmes.append({
+        'nome': nome,
+        'descricao': descricao,
+        'duracao': duracao,
+        'sinopse': sinopse})
+
+#Função para inicializar cadeiras
+def inicializar_cadeiras(sessao):
+    tipos_sessoes = {
+        'Básica': 20,
+        'XD': 20,
+        'Super Confortável': 15,
+        'Luxo': 10
+    }
+    if sessao['tipo'] in tipos_sessoes:
+        sessao['cadeiras'] = ['Livre'] * tipos_sessoes[sessao['tipo']]
+        return True
+    else:
+        print('Tipo de sessão inválido. Tente novamente.')
+        return False
+
+#Função para calcular o acrescimo
+def calcular_acrescimo(sessao):
+    acrescimos = {
+        'Básica': 0.0,
+        'XD': 0.1,
+        'Super Confortável': 0.12,
+        'Luxo': 0.15
+    }
+    if sessao['tipo'] in acrescimos:
+        sessao['valor'] += sessao['valor'] * acrescimos[sessao['tipo']]
+
+#Função para cadastrar sessão
+def cadastrar_sessao():
+    if not filmes:
+        print('\nNenhum filme cadastrado. Cadastre um filme primeiro.')
+        return
+
+    data = input('\nDigite a data da sessão (AAAA-MM-DD): ')
+    horario = input('Digite o horário da sessão (HH:MM): ')
+    valor = float(input('Digite o valor do ingresso: '))
+    print('Selecione um filme: ')
+    for i, filme in enumerate(filmes):
+        print(f"{i + 1}. {filme['nome']}")
+    filme_idx = int(input("Número do filme: ")) - 1
+    tipo = input('Tipo da sessão (Básica, XD, Super Confortável, Luxo): ')
+
+    sessao = {
+        'data': data,
+        'horario': horario,
+        'valor': valor,
+        'filme': filmes[filme_idx],
+        'tipo': tipo,
+        'cadeiras': []}
+
+    if inicializar_cadeiras(sessao):
+        calcular_acrescimo(sessao)
+        sessoes.append(sessao)
+    else:
+        print('Erro. Sessão não cadastrada.')
+
+#Função para mostrar cadeiras vagas
+def mostrar_cadeiras_vagas(sessao):
+    vagas = [i for i, status in enumerate(sessao["cadeiras"]) if status == "Livre"]
+    print("Cadeiras vagas:", vagas)
+    return vagas
+
+#Função para obter os brindes
+def obter_brinde(tipo_sessao):
+    brindes = {
+        'Básica': 'Sem brinde',
+        'XD': 'Bonequinho do BCTec',
+        'Super Confortável': 'Bonequinho do BCTec, mais um combo de pipoca',
+        'Luxo': 'Bonequinho do BCTec, mais um combo de pipoca, refrigerante e chocolate'
+    }
+    return brindes.get(tipo_sessao, "Sem brinde")
+
+#Função para vender cadeiras
+def vender_cadeira(sessao):
+    vagas = mostrar_cadeiras_vagas(sessao)
+    if not vagas:
+        print("Não há cadeiras disponíveis.")
+        return
+    numero_cadeira = int(input("Escolha uma cadeira (número): "))
+    if sessao["cadeiras"][numero_cadeira] == "Livre":
+        sessao["cadeiras"][numero_cadeira] = "Ocupada"
+        forma_pagamento = input("Forma de pagamento (PIX, dinheiro, débito, crédito): ")
+        brinde = obter_brinde(sessao["tipo"])
+        print("\nCadeira vendida com sucesso!")
+        print("\nBilhete:")
+        print('\n============================================')
+        print('| Bilhete |')
+        print('============================================')
+        print(f"\nFilme: {sessao['filme']['nome']}")
+        print(f"Data: {sessao['data']}")
+        print(f"Horário: {sessao['horario']}")
+        print(f"Tipo de sessão: {sessao['tipo']}")
+        print(f"Valor do ingresso: R${sessao['valor']:.2f}")
+        print(f"Forma de pagamento: {forma_pagamento}")
+        print(f"Brinde: {brinde}")
+    else:
+        print("Cadeira já ocupada!")
+
+#Função para exibir relatório de vendas
+def relatorio_vendas():
+    total_arrecadado_geral = 0
+    brindes_contagem = {
+        'Bonequinho do BCTec': 0,
+        'Zombo de pipoca': 0,
+        'Refrigerante': 0,
+        'Chocolate': 0
+    }
+
+    for sessao in sessoes:
+        vendidas = sessao["cadeiras"].count("Ocupada")
+        disponiveis = sessao["cadeiras"].count("Livre")
+        total_arrecadado = vendidas * sessao["valor"]
+        total_arrecadado_geral += total_arrecadado
+
+        brinde = obter_brinde(sessao["tipo"])
+        if "Bonequinho do BCTec" in brinde:
+            brindes_contagem["Bonequinho do BCTec"] += vendidas
+        if "combo de pipoca" in brinde:
+            brindes_contagem["Combo de pipoca"] += vendidas
+        if "refrigerante" in brinde:
+            brindes_contagem["Refrigerante"] += vendidas
+        if "chocolate" in brinde:
+            brindes_contagem["Chocolate"] += vendidas
+
+        print('\n============================================')
+        print('| Relatório |')
+        print('============================================')
+        print(f"Sessão {sessao['filme']['nome']} ({sessao['data']} {sessao['horario']})")
+        print(f"Cadeiras vendidas: {vendidas}")
+        print(f"Cadeiras disponíveis: {disponiveis}")
+        print(f"Total arrecadado na sessão: R${total_arrecadado:.2f}")
+        print()
+
+    print(f"Total arrecadado geral: R${total_arrecadado_geral:.2f}")
+    print("Brindes vendidos:")
+    for brinde, quantidade in brindes_contagem.items():
+        print(f"{brinde}: {quantidade}")
+
+while True:
+    print('\n================================================')
+    print('| Cine BCTec |')
+    print('============================================')
+    print("\n1. Cadastrar filme")
+    print("2. Cadastrar sessão")
+    print("3. Vender cadeira")
+    print("4. Relatório de vendas")
+    print("5. Sair")
+    opcao = input("\nEscolha uma opção: ")
+
+    if opcao == "1":
+        cadastrar_filme()
+    elif opcao == "2":
+        cadastrar_sessao()
+    elif opcao == "3":
+        if not sessoes:
+            print("Nenhuma sessão cadastrada. Cadastre uma sessão primeiro.")
+        else:
+            print("Selecione uma sessão:")
+            for i, sessao in enumerate(sessoes):
+                print(f"{i + 1}. {sessao['filme']['nome']} - {sessao['data']} {sessao['horario']} ({sessao['tipo']})")
+            sessao_idx = int(input("Número da sessão: ")) - 1
+            vender_cadeira(sessoes[sessao_idx])
+    elif opcao == "4":
+        relatorio_vendas()
+    elif opcao == "5":
+        break
+    else:
+        print("Opção inválida. Tente novamente.")
