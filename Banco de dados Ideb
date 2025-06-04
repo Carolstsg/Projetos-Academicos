@@ -1,0 +1,94 @@
+import mysql.connector
+from mysql.connector import errorcode
+conexao = mysql.connector.connect(
+    host='test_db.mysql.dbaas.com.br',
+    user='test_db',
+    password='BD@2024bctec',
+    database='test_db'
+)
+cursor= conexao.cursor()
+
+comando = f'select * from ideb where ano = 2019'
+cursor.execute(comando)
+resultado = cursor.fetchall()
+
+for dados in resultado:
+    print(dados)
+
+conexao.close()
+
+import mysql.connector
+from mysql.connector import errorcode
+conexao = mysql.connector.connect(
+    host='test_db.mysql.dbaas.com.br',
+    user='test_db',
+    password='BD@2024bctec',
+    database='test_db'
+)
+cursor= conexao.cursor()
+
+comando= f'select * from ideb where rede = "privada"'
+cursor.execute(comando)
+resultado = cursor.fetchall()
+
+for dados in resultado:
+    print(dados)
+
+conexao.close()
+
+import mysql.connector
+from mysql.connector import errorcode
+conexao = mysql.connector.connect(
+    host='test_db.mysql.dbaas.com.br',
+    user='test_db',
+    password='BD@2024bctec',
+    database='test_db'
+)
+cursor= conexao.cursor()
+
+comando= f'select * from ideb where ensino = "fundamental"'
+cursor.execute(comando)
+resultado = cursor.fetchall()
+
+for dados in resultado:
+    print(dados)
+
+conexao.close()
+
+import mysql.connector
+from mysql.connector import errorcode
+conexao = mysql.connector.connect(
+    host='test_db.mysql.dbaas.com.br',
+    user='test_db',
+    password='BD@2024bctec',
+    database='test_db'
+)
+cursor= conexao.cursor()
+
+comando= f'select * from ideb where anos_escolares = "finais (6-9)"'
+cursor.execute(comando)
+resultado = cursor.fetchall()
+
+for dados in resultado:
+    print(dados)
+
+conexao.close()
+
+import mysql.connector
+from mysql.connector import errorcode
+conexao = mysql.connector.connect(
+    host='test_db.mysql.dbaas.com.br',
+    user='test_db',
+    password='BD@2024bctec',
+    database='test_db'
+)
+cursor= conexao.cursor()
+
+comando= f'select AVG(indicador_rendimento) as media_indicador from ideb'
+cursor.execute(comando)
+resultado = cursor.fetchall()
+
+for dados in resultado:
+    print(dados)
+
+conexao.close()
