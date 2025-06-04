@@ -1,0 +1,96 @@
+import streamlit as st
+import pandas as pd
+import pymysql
+import plotly.express as px
+def get_data():
+conexao = pymysql.connect(
+host='localhost',
+user='root',
+password='',
+database='analise_agua'
+)
+query = """
+SELECT a.data_amostra, a.nome_amostra, l.nome_local, l.latitude,
+l.longitude,
+d.condutividade, d.temperatura, d.turbidez, p.valores AS ph
+FROM amostra a
+JOIN local l ON a.id_local = l.id_local
+JOIN dados d ON a.id_amostra = d.id_amostra
+JOIN ph p ON a.id_ph = p.id_ph
+LIMIT 0, 25;
+"""
+df = pd.read_sql(query, conexao)
+conexao.close()
+df = df.dropna(subset=['latitude', 'longitude'])
+return df
+# Função para exibir a tabela e gráficos no Streamlit
+def dashboard():
+st.title("Dashboard de Análise de Água")
+df = get_data()
+# Exibir a tabela com os dados
+st.subheader("Dados das Amostras")
+st.dataframe(df.style.set_table_styles(
+[({
+'selector': 'thead th',
+'props': [('background-color', '#4CAF50'), ('color', 'white')]
+}), {
+'selector': 'tbody td',
+'props': [('background-color', '#f9f9f9')]
+}]))
+# Gráfico de dispersão: Condutividade vs Temperatura com pH
+st.subheader("Gráfico: Condutividade vs Temperatura (com pH)")
+fig2 = px.scatter(df,
+x='condutividade',
+y='temperatura',
+size='ph',
+size_max=20,
+title="Relação entre Condutividade e Temperatura
+(com pH)",
+labels={'condutividade': 'Condutividade (μS/cm)',
+'temperatura': 'Temperatura (°C)', 'ph': 'pH'},
+color='ph',
+hover_data=['nome_amostra', 'nome_local']
+)
+# estética
+fig2.update_traces(marker=dict(line=dict(width=2,
+color='DarkSlateGrey')),
+opacity=0.7)
+fig2.update_layout(
+xaxis=dict(showgrid=True, gridwidth=1, gridcolor='lightgrey'),
+yaxis=dict(showgrid=True, gridwidth=1, gridcolor='lightgrey'),
+title_x=0.5,
+template='plotly_dark'
+)
+st.plotly_chart(fig2)
+# Mapa com as coordenadas de latitude e longitude
+st.subheader("Mapa com Localizações das Amostras")
+# Coordenadas da UNIFEI para abrir o mapa onde desejamos
+unifei_lat = -22.41253
+unifei_lon = -45.44983
+fig_map = px.scatter_mapbox(df,
+lat='latitude',
+lon='longitude',
+color='nome_local',
+hover_name='nome_amostra',
+hover_data=['nome_local', 'condutividade',
+'temperatura', 'ph'],
+size_max=10, # Tamanho fixo para os
+pontos
+title="Mapa das Amostras de Água",
+labels={"nome_local": "Local da Amostra"}
+)
+fig_map.update_layout(
+mapbox_style="carto-positron",
+mapbox_zoom=14,
+mapbox_center={"lat": unifei_lat, "lon": unifei_lon}, #para
+centralizar na UNIFEI
+title_x=0.5,
+showlegend=True
+)
+fig_map.update_traces(marker=dict(symbol='circle', size=7,
+color='black'))
+# Exibindo o gráfico no Streamlit
+st.plotly_chart(fig_map, use_container_width=True)
+# Executando o dashboard
+if __name__ == "__main__":
+dashboard()
